@@ -7,8 +7,7 @@ mod vga_buffer;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    use core::fmt::Write;
-    write!(vga_buffer::WRITER.lock(), "Hello world").unwrap();
+    println!("Hello world");
     loop {}
 }
 

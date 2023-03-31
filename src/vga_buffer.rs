@@ -1,6 +1,6 @@
 use volatile::Volatile;
 use lazy_static::lazy_static;
-use core::fmt::Write;
+use core::fmt::{Write, self};
 use spin::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -125,3 +125,19 @@ lazy_static!(
         buffer: unsafe {&mut *(0xb8000 as *mut Buffer)}
     });
 );
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => (print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    WRITER.lock().write_fmt(args).unwrap();
+}
