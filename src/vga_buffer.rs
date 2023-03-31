@@ -1,4 +1,5 @@
 use volatile::Volatile;
+use core::fmt::Write;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -86,7 +87,23 @@ impl Writer {
         }
     }
 
-    fn new_line(&mut self) {}
+    fn new_line(&mut self) {
+        for row in 1..BUFFER_HEIGHT {
+            for col in 0..BUFFER_WIDTH {
+                let character = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(character);
+            }
+        }
+        // self.clear_row(BUFFER_HEIGHT - 1);
+        self.collumn_position = 0;
+    }
+}
+
+impl Write for Writer {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
 }
 
 pub fn hello_world() {
@@ -96,5 +113,5 @@ pub fn hello_world() {
         buffer: unsafe {&mut *(0xb8000 as *mut Buffer)}
     };
 
-    writer.write_string("hello world");
+    write!(writer, "hello world").unwrap();
 }
