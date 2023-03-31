@@ -1,5 +1,7 @@
 use volatile::Volatile;
+use lazy_static::lazy_static;
 use core::fmt::Write;
+use spin::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -94,8 +96,18 @@ impl Writer {
                 self.buffer.chars[row - 1][col].write(character);
             }
         }
-        // self.clear_row(BUFFER_HEIGHT - 1);
+        self.clear_row(BUFFER_HEIGHT - 1);
         self.collumn_position = 0;
+    }
+
+    fn clear_row(&mut self, row: usize) {
+        let blank = ScreenChar {
+            ascii_character: b' ',
+            color_code: self.color_code
+        };
+        for col in 0..BUFFER_WIDTH {
+            self.buffer.chars[row][col].write(blank);
+        }
     }
 }
 
@@ -106,12 +118,10 @@ impl Write for Writer {
     }
 }
 
-pub fn hello_world() {
-    let mut writer = Writer {
+lazy_static!(
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         collumn_position: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         buffer: unsafe {&mut *(0xb8000 as *mut Buffer)}
-    };
-
-    write!(writer, "hello world").unwrap();
-}
+    });
+);
