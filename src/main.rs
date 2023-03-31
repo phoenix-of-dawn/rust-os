@@ -3,11 +3,12 @@
 
 use core::panic::PanicInfo;
 
+mod vga_buffer;
+
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    loop {
-        
-    }
+    vga_buffer::hello_world();
+    loop {}
 }
 
 #[panic_handler]
