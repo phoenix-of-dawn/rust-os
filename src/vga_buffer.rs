@@ -118,13 +118,13 @@ impl Write for Writer {
     }
 }
 
-lazy_static!(
+lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         collumn_position: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         buffer: unsafe {&mut *(0xb8000 as *mut Buffer)}
     });
-);
+}
 
 #[macro_export]
 macro_rules! print {
