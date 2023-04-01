@@ -1,3 +1,4 @@
+use x86_64::instructions::interrupts;
 use volatile::Volatile;
 use lazy_static::lazy_static;
 use core::fmt::{Write, self};
@@ -139,5 +140,6 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    WRITER.lock().write_fmt(args).unwrap();
+    interrupts::without_interrupts(|| 
+         WRITER.lock().write_fmt(args).unwrap());
 }
