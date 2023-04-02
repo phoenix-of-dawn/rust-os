@@ -4,7 +4,7 @@
 
 use core::panic::PanicInfo;
 use lazy_static::lazy_static;
-use rust_os::{serial_print, serial_println, exit_qemu, QemuExitCode};
+use rust_os::{exit_qemu, serial_print, serial_println, QemuExitCode};
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 #[no_mangle]
@@ -24,7 +24,6 @@ fn panic(info: &PanicInfo) -> ! {
     rust_os::test_panic_handler(info)
 }
 
-
 #[allow(unconditional_recursion)]
 fn stack_overflow() {
     stack_overflow();
@@ -35,7 +34,8 @@ lazy_static! {
     static ref TEST_IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
         unsafe {
-            idt.double_fault.set_handler_fn(test_double_fault_handler)
+            idt.double_fault
+                .set_handler_fn(test_double_fault_handler)
                 .set_stack_index(rust_os::gdt::DOUBLE_FAULT_IST_INDEX);
         }
         idt

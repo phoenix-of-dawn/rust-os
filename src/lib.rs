@@ -6,13 +6,19 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-
 use x86_64::instructions;
 
+#[cfg(test)]
+use bootloader::{entry_point, BootInfo};
+
+#[cfg(test)]
+entry_point!(test_kernel_main);
+
+pub mod gdt;
+pub mod interrupts;
+pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
-pub mod interrupts;
-pub mod gdt;
 
 pub fn init() {
     interrupts::init();
@@ -25,7 +31,10 @@ pub trait Testable {
     fn run(&self) -> ();
 }
 
-impl<T> Testable for T where T: Fn() {
+impl<T> Testable for T
+where
+    T: Fn(),
+{
     fn run(&self) -> () {
         serial_print!("Testing {}...\t", core::any::type_name::<T>());
         self();
@@ -65,8 +74,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 }
 
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
     init();
     hlt_loop();
