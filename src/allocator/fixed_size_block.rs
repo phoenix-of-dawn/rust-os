@@ -1,6 +1,6 @@
 use alloc::alloc::{GlobalAlloc, Layout};
-use core::{ptr, ptr::NonNull};
 use core::mem;
+use core::{ptr, ptr::NonNull};
 
 use super::Locked;
 
@@ -34,7 +34,7 @@ impl FixedSizeBlockAllocator {
         self.fallback_allocator.init(heap_start, heap_size);
     }
 
-        /// Allocates using the fallback allocator.
+    /// Allocates using the fallback allocator.
     fn fallback_alloc(&mut self, layout: Layout) -> *mut u8 {
         match self.fallback_allocator.allocate_first_fit(layout) {
             Ok(ptr) => ptr.as_ptr(),
@@ -63,13 +63,12 @@ unsafe impl GlobalAlloc for Locked<FixedSizeBlockAllocator> {
                         let block_size = BLOCK_SIZES[index];
                         // only works if all block sizes are a power of 2
                         let block_align = block_size;
-                        let layout = Layout::from_size_align(block_size, block_align)
-                            .unwrap();
+                        let layout = Layout::from_size_align(block_size, block_align).unwrap();
                         allocator.fallback_alloc(layout)
                     }
                 }
             }
-            None => allocator.fallback_alloc(layout)
+            None => allocator.fallback_alloc(layout),
         }
     }
 
@@ -94,5 +93,3 @@ unsafe impl GlobalAlloc for Locked<FixedSizeBlockAllocator> {
         }
     }
 }
-
-
